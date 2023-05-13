@@ -1,0 +1,5 @@
+package com.Project.GoodToTrade.Enums;
+
+public enum SubCategory {
+    MOBILE, LAPTOP, SOFA, TABLE, SHIRT, PANTS, NOVEL, TEXTBOOK, POWER_TOOLS, HAND_TOOLS, SOFT_TOYS, EDUCATIONAL_TOYS
+}
