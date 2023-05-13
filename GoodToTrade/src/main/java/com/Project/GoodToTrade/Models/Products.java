@@ -1,6 +1,7 @@
 package com.Project.GoodToTrade.Models;
 
 import com.Project.GoodToTrade.Enums.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -42,6 +43,7 @@ public class Products {
     private Users owner;
 
     @OneToMany(mappedBy = "liked", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<TheLikes> likes;
 
     public Products(String productName, Double price, String description, String imageUrl, Category category, SubCategory subcategory, Category desiredCategory, SubCategory desiredSubcategory, Users owner, List<TheLikes> likes) {

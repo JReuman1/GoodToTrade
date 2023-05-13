@@ -1,7 +1,12 @@
 package com.Project.GoodToTrade.Controllers;
 
+import com.Project.GoodToTrade.DTOs.LikeDTO;
+import com.Project.GoodToTrade.Models.Products;
 import com.Project.GoodToTrade.Models.TheLikes;
+import com.Project.GoodToTrade.Models.Users;
+import com.Project.GoodToTrade.Services.ProductsService;
 import com.Project.GoodToTrade.Services.TheLikesService;
+import com.Project.GoodToTrade.Services.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,12 +19,15 @@ import java.util.List;
 public class TheLikesController {
 
     private final TheLikesService theLikesService;
+    private final UsersService usersService;
+    private final ProductsService productsService;
 
     @Autowired
-    public TheLikesController(TheLikesService theLikesService) {
+    public TheLikesController(TheLikesService theLikesService, UsersService usersService, ProductsService productsService) {
         this.theLikesService = theLikesService;
+        this.usersService = usersService;
+        this.productsService = productsService;
     }
-
     @GetMapping
     public ResponseEntity<List<TheLikes>> getLikes() {
         return new ResponseEntity<>(theLikesService.getLikes(), HttpStatus.OK);
@@ -41,9 +49,13 @@ public class TheLikesController {
     }
 
     @PostMapping
-    public ResponseEntity<TheLikes> saveLike(@RequestBody TheLikes like) {
+    public ResponseEntity<TheLikes> saveLike(@RequestBody LikeDTO likeDTO) {
+        Users user = usersService.getUser(likeDTO.getUserId());
+        Products product = productsService.getProduct(likeDTO.getProductId());
+        TheLikes like = new TheLikes(user, product);
         return new ResponseEntity<>(theLikesService.saveLike(like), HttpStatus.CREATED);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<TheLikes> updateLike(@PathVariable Long id, @RequestBody TheLikes updatedLike) {
