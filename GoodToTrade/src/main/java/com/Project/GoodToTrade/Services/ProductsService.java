@@ -49,6 +49,37 @@ public class ProductsService {
         return productsRepository.save(product);
     }
 
+    public Products updateProduct(Long id, Products updatedProduct) {
+        return productsRepository.findById(id)
+                .map(product -> {
+                    if(updatedProduct.getProductName() != null){
+                        product.setProductName(updatedProduct.getProductName());
+                    }
+                    if(updatedProduct.getPrice() != null){
+                        product.setPrice(updatedProduct.getPrice());
+                    }
+                    if(updatedProduct.getDescription() != null){
+                        product.setDescription(updatedProduct.getDescription());
+                    }
+                    if(updatedProduct.getImageUrl() != null){
+                        product.setImageUrl(updatedProduct.getImageUrl());
+                    }
+                    if(updatedProduct.getCategory() != null){
+                        product.setCategory(updatedProduct.getCategory());
+                    }
+                    if(updatedProduct.getSubcategory() != null){
+                        product.setSubcategory(updatedProduct.getSubcategory());
+                    }
+                    if(updatedProduct.getDesiredCategory() != null){
+                        product.setDesiredCategory(updatedProduct.getDesiredCategory());
+                    }
+                    if(updatedProduct.getDesiredSubcategory() != null){
+                        product.setDesiredSubcategory(updatedProduct.getDesiredSubcategory());
+                    }
+                    return productsRepository.save(product);
+                })
+                .orElseThrow(() -> new NoSuchElementException("Product not found with id: " + id));
+    }
     public void deleteProduct(Long id) {
         if (productsRepository.existsById(id)) {
             productsRepository.deleteById(id);
