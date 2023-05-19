@@ -8,4 +8,6 @@ import java.util.List;
 public interface TheLikesRepository extends JpaRepository<TheLikes, Long> {
     List<TheLikes> findByLikedBy_Id(Long userId);
     List<TheLikes> findByLiked_Id(Long productId);
+    List<TheLikes> findByLiked_IdAndLikedBy_Id(Long likedId, Long likedById);
+
 }
