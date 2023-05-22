@@ -59,18 +59,7 @@ public class ProductsController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Products> updateProduct(@PathVariable Long id, @RequestBody Products updatedProduct) {
-        Products currentProduct = productsService.getProduct(id);
-        currentProduct.setProductName(updatedProduct.getProductName());
-        currentProduct.setPrice(updatedProduct.getPrice());
-        currentProduct.setDescription(updatedProduct.getDescription());
-        currentProduct.setImageUrl(updatedProduct.getImageUrl());
-        currentProduct.setCategory(updatedProduct.getCategory());
-        currentProduct.setSubcategory(updatedProduct.getSubcategory());
-        currentProduct.setDesiredCategory(updatedProduct.getDesiredCategory());
-        currentProduct.setDesiredSubcategory(updatedProduct.getDesiredSubcategory());
-        currentProduct.setOwner(updatedProduct.getOwner());
-        currentProduct.setLikes(updatedProduct.getLikes());
-        return new ResponseEntity<>(productsService.saveProduct(currentProduct), HttpStatus.OK);
+        return new ResponseEntity<>(productsService.updateProduct(id, updatedProduct), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")

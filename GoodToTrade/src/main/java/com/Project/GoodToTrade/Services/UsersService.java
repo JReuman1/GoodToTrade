@@ -36,6 +36,28 @@ public class UsersService {
         return usersRepository.save(user);
     }
 
+    public Users updateUser(Long id, Users updatedUser) {
+        return usersRepository.findById(id)
+                .map(user -> {
+                    if(updatedUser.getUsername() != null){
+                        user.setUsername(updatedUser.getUsername());
+                    }
+                    if(updatedUser.getFullName() != null){
+                        user.setFullName(updatedUser.getFullName());
+                    }
+                    if(updatedUser.getEmail() != null){
+                        user.setEmail(updatedUser.getEmail());
+                    }
+                    if(updatedUser.getPhone() != null){
+                        user.setPhone(updatedUser.getPhone());
+                    }
+                    if(updatedUser.getPassword() != null){
+                        user.setPassword(updatedUser.getPassword());
+                    }
+                    return usersRepository.save(user);
+                })
+                .orElseThrow(() -> new NoSuchElementException("User not found with id: " + id));
+    }
     public void deleteUser(Long id) {
         if (usersRepository.existsById(id)) {
             usersRepository.deleteById(id);

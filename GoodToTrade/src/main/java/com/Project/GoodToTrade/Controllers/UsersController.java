@@ -42,15 +42,7 @@ public class UsersController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Users> updateUser(@PathVariable Long id, @RequestBody Users updatedUser) {
-        Users currentUser = usersService.getUser(id);
-        currentUser.setUsername(updatedUser.getUsername());
-        currentUser.setFullName(updatedUser.getFullName());
-        currentUser.setEmail(updatedUser.getEmail());
-        currentUser.setPhone(updatedUser.getPhone());
-        currentUser.setPassword(updatedUser.getPassword());
-        currentUser.setProducts(updatedUser.getProducts());
-        currentUser.setLikes(updatedUser.getLikes());
-        return new ResponseEntity<>(usersService.saveUser(currentUser), HttpStatus.OK);
+        return new ResponseEntity<>(usersService.updateUser(id, updatedUser), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
