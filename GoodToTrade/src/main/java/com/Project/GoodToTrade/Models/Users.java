@@ -4,7 +4,12 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+
+import static jakarta.persistence.FetchType.EAGER;
 
 @Entity
 public class Users {
@@ -37,6 +42,10 @@ public class Users {
     @JsonIgnore
     private List<TheLikes> likes;
 
+    @ManyToMany(fetch = EAGER)
+    private Collection<Role> roles = new ArrayList<>();
+
+
     public Users(String username, String fullName, String email, String phone, String password, List<Products> products, List<TheLikes> likes) {
         this.username = username;
         this.fullName = fullName;
@@ -45,6 +54,7 @@ public class Users {
         this.password = password;
         this.products = products;
         this.likes = likes;
+        this.roles = roles;
     }
 
     public Users() {
@@ -112,5 +122,13 @@ public class Users {
 
     public void setLikes(List<TheLikes> likes) {
         this.likes = likes;
+    }
+
+    public Collection<Role> getRoles() {
+        return roles;
+    }
+
+    public void setRoles(Collection<Role> roles) {
+        this.roles = roles;
     }
 }
