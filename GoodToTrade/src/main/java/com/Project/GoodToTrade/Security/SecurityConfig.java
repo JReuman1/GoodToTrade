@@ -25,16 +25,10 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    @Autowired
-    private final UserDetailsService userDetailsService;
 
     @Autowired
     private AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(userDetailsService).passwordEncoder(encoder());
-    }
 
     @Bean
     public PasswordEncoder encoder() {

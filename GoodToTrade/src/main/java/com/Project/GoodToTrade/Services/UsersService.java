@@ -2,6 +2,7 @@ package com.Project.GoodToTrade.Services;
 
 import com.Project.GoodToTrade.Models.Role;
 import com.Project.GoodToTrade.Models.Users;
+import com.Project.GoodToTrade.Repositories.RoleRepository;
 import com.Project.GoodToTrade.Repositories.UsersRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
@@ -22,13 +23,15 @@ import java.util.NoSuchElementException;
 public class UsersService implements UserDetailsService {
 
     private final UsersRepository usersRepository;
+    private final RoleRepository roleRepository;
 
     private final PasswordEncoder passwordEncoder;
 
 
-    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder) {
+    public UsersService(UsersRepository usersRepository, PasswordEncoder passwordEncoder, RoleRepository roleRepository) {
         this.usersRepository = usersRepository;
         this.passwordEncoder = passwordEncoder;
+        this.roleRepository = roleRepository;
     }
 
     public List<Users> getUsers() {
@@ -90,5 +93,20 @@ public class UsersService implements UserDetailsService {
         authorities.add(new SimpleGrantedAuthority("ROLE_USER"));
 
         return new User(user.getUsername(), user.getPassword(), authorities);
+    }
+    public Role saveRole(Role role) {
+        return roleRepository.save(role);
+    }
+
+    public void addRoleToUser(String username, String roleName) {
+        Users user = usersRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("User not found with username: " + username));
+        Role role = roleRepository.findByName(roleName);
+        if (role == null) {
+            throw new NoSuchElementException("Role not found with name: " + roleName);
+        }
+
+        user.getRoles().add(role);
+        usersRepository.save(user);
     }
 }

@@ -46,7 +46,7 @@ public class Users {
     private Collection<Role> roles = new ArrayList<>();
 
 
-    public Users(String username, String fullName, String email, String phone, String password, List<Products> products, List<TheLikes> likes) {
+    public Users(String username, String fullName, String email, String phone, String password, List<Products> products, List<TheLikes> likes, Collection<Role> roles) {
         this.username = username;
         this.fullName = fullName;
         this.email = email;
