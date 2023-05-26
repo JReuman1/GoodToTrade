@@ -49,9 +49,19 @@ public class UsersService implements UserDetailsService {
     }
 
     public Users saveUser(Users user) {
+        Role userRole = roleRepository.findByName("ROLE_USER");
+        if (userRole != null) {
+            user.getRoles().add(userRole);
+        } else {
+            userRole = new Role();
+            userRole.setName("ROLE_USER");
+            roleRepository.save(userRole);
+            user.getRoles().add(userRole);
+        }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         return usersRepository.save(user);
     }
+
 
     public Users updateUser(Long id, Users updatedUser) {
         return usersRepository.findById(id)

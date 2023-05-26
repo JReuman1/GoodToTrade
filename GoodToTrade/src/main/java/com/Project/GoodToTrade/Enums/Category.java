@@ -6,5 +6,7 @@ public enum Category {
     CLOTHING,
     BOOKS,
     TOOLS,
-    TOYS
+    TOYS,
+    MEDICAL,
+    OUTDOORS
 }

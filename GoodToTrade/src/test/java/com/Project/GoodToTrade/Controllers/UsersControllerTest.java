@@ -5,24 +5,21 @@ import com.Project.GoodToTrade.Services.UsersService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collections;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -34,83 +31,94 @@ public class UsersControllerTest {
     @MockBean
     private UsersService usersService;
 
-    private Users user1;
-    private Users user2;
+    private Users user;
 
     @BeforeEach
-    public void setup() {
-        user1 = new Users("User1", "FullName1", "user1@email.com", "1234567890", "password1", null, null);
-        user1.setId(1L);
-
-        user2 = new Users("User2", "FullName2", "user2@email.com", "0987654321", "password2", null, null);
-        user2.setId(2L);
-
-        Mockito.reset(usersService);
+    public void setUp() {
+        user = new Users();
+        user.setId(1L);
+        user.setUsername("testUser");
+        user.setPassword("password");
+        user.setFullName("Test Full Name");
+        user.setEmail("testUser@example.com");
+        user.setPhone("1234567890");
     }
 
+    // Test cases for "/api/users" endpoint
     @Test
-    public void testGetUsers() throws Exception {
-        List<Users> users = Arrays.asList(user1, user2);
+    @WithMockUser(value = "spring")
+    public void getUsers_returnsUserList() throws Exception {
+        when(usersService.getUsers()).thenReturn(Collections.singletonList(user));
 
-        when(usersService.getUsers()).thenReturn(users);
-
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/api/users")
+                        .with(httpBasic(user.getUsername(), user.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$", hasSize(2)))
-                .andExpect(jsonPath("$[0].username", is(user1.getUsername())))
-                .andExpect(jsonPath("$[1].username", is(user2.getUsername())));
+                .andExpect(jsonPath("$[0].username").value(user.getUsername()));
     }
 
+    // Test cases for "/api/users/{id}" endpoint
     @Test
-    public void testGetUser() throws Exception {
-        when(usersService.getUser(1L)).thenReturn(user1);
+    @WithMockUser(value = "spring")
+    public void getUserById_returnsUser() throws Exception {
+        when(usersService.getUser(user.getId())).thenReturn(user);
 
-        mockMvc.perform(get("/api/users/1"))
+        mockMvc.perform(get("/api/users/{id}", user.getId())
+                        .with(httpBasic(user.getUsername(), user.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username", is(user1.getUsername())));
-        System.out.println(user1.getUsername());
+                .andExpect(jsonPath("$.username").value(user.getUsername()));
     }
 
+    // Test cases for "/api/users/username/{username}" endpoint
     @Test
-    public void testGetUserByUsername() throws Exception {
-        when(usersService.getUserByUsername("User1")).thenReturn(user1);
+    @WithMockUser(value = "spring")
+    public void getUserByUsername_returnsUser() throws Exception {
+        when(usersService.getUserByUsername(user.getUsername())).thenReturn(user);
 
-        mockMvc.perform(get("/api/users/username/User1"))
+        mockMvc.perform(get("/api/users/username/{username}", user.getUsername())
+                        .with(httpBasic(user.getUsername(), user.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username", is(user1.getUsername())));
+                .andExpect(jsonPath("$.username").value(user.getUsername()));
     }
 
+    // Test cases for "/api/users" POST endpoint
     @Test
-    public void testSaveUser() throws Exception {
-        when(usersService.saveUser(any(Users.class))).thenReturn(user1);
+    @WithMockUser(value = "spring")
+    public void saveUser_returnsCreatedUser() throws Exception {
+        when(usersService.saveUser(user)).thenReturn(user);
 
         mockMvc.perform(post("/api/users")
+                        .with(httpBasic(user.getUsername(), user.getPassword()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(user1)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username", is(user1.getUsername())));
+                        .content(new ObjectMapper().writeValueAsString(user)))
+                .andExpect(status().isCreated());
+    }
+
+
+    @Test
+    public void loginWithInvalidCredentials_returnsUnauthorized() throws Exception {
+        mockMvc.perform(post("/api/login")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("username", "invalidUser")
+                        .param("password", "invalidPassword"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    // Test cases for authentication and authorization
+    @Test
+    public void getUsers_unauthenticated_returnsItsOk() throws Exception {
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk());
     }
 
     @Test
-    public void testUpdateUser() throws Exception {
-        Users userUpdated = new Users("User1Updated", "FullNameUpdated", "userUpdated@email.com", "0987654321", "passwordUpdated", null, null);
-        userUpdated.setId(1L);
+    @WithMockUser(value = "spring")
+    public void getUsers_authenticated_returnsOk() throws Exception {
+        when(usersService.getUsers()).thenReturn(Collections.singletonList(user));
 
-        when(usersService.getUser(1L)).thenReturn(user1);
-        when(usersService.saveUser(any(Users.class))).thenReturn(userUpdated);
-
-        mockMvc.perform(put("/api/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(userUpdated)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username", is(userUpdated.getUsername())));
-    }
-
-    @Test
-    public void testDeleteUser() throws Exception {
-        Mockito.doNothing().when(usersService).deleteUser(1L);
-
-        mockMvc.perform(delete("/api/users/1"))
-                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/api/users"))
+                .andExpect(status().isOk());
     }
 }

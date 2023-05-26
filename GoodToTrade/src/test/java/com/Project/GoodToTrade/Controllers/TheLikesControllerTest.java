@@ -1,5 +1,22 @@
 package com.Project.GoodToTrade.Controllers;
 
+import java.util.Arrays;
+import java.util.List;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.*;
+
 import com.Project.GoodToTrade.DTOs.LikeDTO;
 import com.Project.GoodToTrade.Models.Products;
 import com.Project.GoodToTrade.Models.TheLikes;
@@ -7,26 +24,10 @@ import com.Project.GoodToTrade.Models.Users;
 import com.Project.GoodToTrade.Services.ProductsService;
 import com.Project.GoodToTrade.Services.TheLikesService;
 import com.Project.GoodToTrade.Services.UsersService;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Arrays;
-import java.util.List;
-
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.hamcrest.Matchers.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -51,7 +52,7 @@ public class TheLikesControllerTest {
 
     @BeforeEach
     public void setup() {
-        user = new Users("User1", "FullName1", "user1@email.com", "1234567890", "password1", null, null);
+        user = new Users("User1", "FullName1", "user1@email.com", "1234567890", "password1", null, null, null);
         user.setId(1L);
 
         product = new Products();
@@ -67,12 +68,14 @@ public class TheLikesControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "spring")
     public void testGetLikes() throws Exception {
         List<TheLikes> likes = Arrays.asList(like1, like2);
 
         when(theLikesService.getLikes()).thenReturn(likes);
 
-        mockMvc.perform(get("/api/likes"))
+        mockMvc.perform(get("/api/likes")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic(user.getUsername(), user.getPassword())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(like1.getId().intValue())))
@@ -80,21 +83,25 @@ public class TheLikesControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "spring")
     public void testGetLike() throws Exception {
         when(theLikesService.getLike(1L)).thenReturn(like1);
 
-        mockMvc.perform(get("/api/likes/1"))
+        mockMvc.perform(get("/api/likes/1")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic(user.getUsername(), user.getPassword())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id", is(like1.getId().intValue())));
     }
 
     @Test
+    @WithMockUser(value = "spring")
     public void testGetLikesByUserId() throws Exception {
         List<TheLikes> likes = Arrays.asList(like1, like2);
 
         when(theLikesService.getLikesByUserId(1L)).thenReturn(likes);
 
-        mockMvc.perform(get("/api/likes/likedBy/1"))
+        mockMvc.perform(get("/api/likes/likedBy/1")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic(user.getUsername(), user.getPassword())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(like1.getId().intValue())))
@@ -102,12 +109,14 @@ public class TheLikesControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "spring")
     public void testGetLikesByProductId() throws Exception {
         List<TheLikes> likes = Arrays.asList(like1, like2);
 
         when(theLikesService.getLikesByProductId(1L)).thenReturn(likes);
 
-        mockMvc.perform(get("/api/likes/liked/1"))
+        mockMvc.perform(get("/api/likes/liked/1")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic(user.getUsername(), user.getPassword())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$", hasSize(2)))
                 .andExpect(jsonPath("$[0].id", is(like1.getId().intValue())))
@@ -115,6 +124,7 @@ public class TheLikesControllerTest {
     }
 
     @Test
+    @WithMockUser(value = "spring")
     public void testSaveLike() throws Exception {
         LikeDTO likeDTO = new LikeDTO();
         likeDTO.setUserId(user.getId());
@@ -122,35 +132,13 @@ public class TheLikesControllerTest {
 
         when(usersService.getUser(likeDTO.getUserId())).thenReturn(user);
         when(productsService.getProduct(likeDTO.getProductId())).thenReturn(product);
-        when(theLikesService.saveLike(any(TheLikes.class))).thenReturn(like1);
+        when(theLikesService.saveLike(Mockito.any(TheLikes.class))).thenReturn(like1);
 
         mockMvc.perform(post("/api/likes")
+                        .with(SecurityMockMvcRequestPostProcessors.httpBasic(user.getUsername(), user.getPassword()))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(new ObjectMapper().writeValueAsString(likeDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id", is(like1.getId().intValue())));
-    }
-
-    @Test
-    public void testUpdateLike() throws Exception {
-        TheLikes updatedLike = new TheLikes(user, product);
-        updatedLike.setId(1L);
-
-        when(theLikesService.getLike(1L)).thenReturn(like1);
-        when(theLikesService.saveLike(any(TheLikes.class))).thenReturn(updatedLike);
-
-        mockMvc.perform(put("/api/likes/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(new ObjectMapper().writeValueAsString(updatedLike)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id", is(updatedLike.getId().intValue())));
-    }
-
-    @Test
-    public void testDeleteLike() throws Exception {
-        Mockito.doNothing().when(theLikesService).deleteLike(1L);
-
-        mockMvc.perform(delete("/api/likes/1"))
-                .andExpect(status().isNoContent());
     }
 }

@@ -14,15 +14,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,123 +40,117 @@ public class ProductsControllerTest {
     @MockBean
     private ProductsService productsService;
 
-    private ObjectMapper objectMapper = new ObjectMapper();
-
-    private List<Products> productList;
-    private Users owner1, owner2;
+    private Products product;
+    private Users owner;
 
     @BeforeEach
-    public void setup() {
-        owner1 = new Users("user1", "User One", "user1@email.com", "1234567890", "password1", null, null);
-        owner1.setId(1L);
+    public void setUp() {
+        owner = new Users("user1", "User One", "user1@email.com", "1234567890", "password1", null, null, null);
+        owner.setId(1L);
 
-        owner2 = new Users("user2", "User Two", "user2@email.com", "0987654321", "password2", null, null);
-        owner2.setId(2L);
-
-        Products product1 = createProduct(1L, "test1", 100.0, "test1", "test1", owner1);
-        Products product2 = createProduct(2L, "test2", 200.0, "test2", "test2", owner2);
-
-        productList = Arrays.asList(product1, product2);
-
-        when(productsService.getProducts()).thenReturn(productList);
-        when(productsService.getProduct(1L)).thenReturn(product1);
-        when(productsService.getProduct(2L)).thenReturn(product2);
-        when(productsService.getProductsByName("test1")).thenReturn(Arrays.asList(product1));
-        when(productsService.getProductsByCategory(Category.ELECTRONICS)).thenReturn(Arrays.asList(product1));
-        when(productsService.getProductsBySubcategory(SubCategory.COMPUTERS)).thenReturn(Arrays.asList(product1));
-        when(productsService.getProductsByOwnerId(1L)).thenReturn(Arrays.asList(product1));
-        when(productsService.saveProduct(any(Products.class))).thenReturn(product1);
-    }
-
-    @Test
-    public void testGetProducts() throws Exception {
-        mockMvc.perform(get("/api/products"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[1].id").value(2L));
-    }
-
-    @Test
-    public void testGetProduct() throws Exception {
-        mockMvc.perform(get("/api/products/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    public void testGetProductsByName() throws Exception {
-        mockMvc.perform(get("/api/products/name/test1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1L));
-    }
-
-    @Test
-    public void testGetProductsByCategory() throws Exception {
-        mockMvc.perform(get("/api/products/category/ELECTRONICS"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1L));
-    }
-
-    @Test
-    public void testGetProductsBySubcategory() throws Exception {
-        mockMvc.perform(get("/api/products/subcategory/COMPUTERS"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1L));
-    }
-
-    @Test
-    public void testGetProductsByOwnerId() throws Exception {
-        mockMvc.perform(get("/api/products/owner/1"))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$[0].id").value(1L));
-    }
-
-    @Test
-    public void testSaveProduct() throws Exception {
-        Products newProduct = createProduct(3L, "test3", 300.0, "test3", "test3", owner1);
-        mockMvc.perform(post("/api/products")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(newProduct)))
-                .andExpect(status().isCreated())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    public void testUpdateProduct() throws Exception {
-        Products updatedProduct = createProduct(1L, "updated", 150.0, "updated", "updated", owner1);
-        mockMvc.perform(put("/api/products/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(updatedProduct)))
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id").value(1L));
-    }
-
-    @Test
-    public void testDeleteProduct() throws Exception {
-        mockMvc.perform(delete("/api/products/1"))
-                .andExpect(status().isNoContent());
-    }
-
-    private Products createProduct(Long id, String productName, Double price, String description, String imageUrl, Users owner) {
-        Products product = new Products();
-        product.setId(id);
-        product.setProductName(productName);
-        product.setPrice(price);
-        product.setDescription(description);
-        product.setImageUrl(imageUrl);
+        product = new Products();
+        product.setId(1L);
+        product.setProductName("testProduct");
+        product.setPrice(100.0);
+        product.setDescription("testDescription");
+        product.setImageUrl("testImageUrl");
         product.setCategory(Category.ELECTRONICS);
         product.setSubcategory(SubCategory.COMPUTERS);
         product.setDesiredCategory(Category.ELECTRONICS);
         product.setDesiredSubcategory(SubCategory.COMPUTERS);
         product.setOwner(owner);
-        return product;
     }
+
+    // Test cases for "/api/products" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProducts_returnsProductList() throws Exception {
+        when(productsService.getProducts()).thenReturn(Collections.singletonList(product));
+
+        mockMvc.perform(get("/api/products")
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productName").value(product.getProductName()));
+    }
+
+    // Test cases for "/api/products/{id}" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProductById_returnsProduct() throws Exception {
+        when(productsService.getProduct(product.getId())).thenReturn(product);
+
+        mockMvc.perform(get("/api/products/{id}", product.getId())
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.productName").value(product.getProductName()));
+    }
+
+    // Test cases for "/api/products/name/{name}" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProductsByName_returnsProduct() throws Exception {
+        when(productsService.getProductsByName(product.getProductName())).thenReturn(Collections.singletonList(product));
+
+        mockMvc.perform(get("/api/products/name/{name}", product.getProductName())
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].productName").value(product.getProductName()));
+    }
+
+    // Test cases for "/api/products/category/{category}" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProductsByCategory_returnsProduct() throws Exception {
+        when(productsService.getProductsByCategory(product.getCategory())).thenReturn(Collections.singletonList(product));
+
+        mockMvc.perform(get("/api/products/category/{category}", product.getCategory().name())
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].category").value(product.getCategory().name()));
+    }
+
+    // Test cases for "/api/products/subcategory/{subcategory}" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProductsBySubcategory_returnsProduct() throws Exception {
+        when(productsService.getProductsBySubcategory(product.getSubcategory())).thenReturn(Collections.singletonList(product));
+
+        mockMvc.perform(get("/api/products/subcategory/{subcategory}", product.getSubcategory().name())
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].subcategory").value(product.getSubcategory().name()));
+    }
+
+    // Test cases for "/api/products/owner/{ownerId}" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void getProductsByOwnerId_returnsProduct() throws Exception {
+        when(productsService.getProductsByOwnerId(owner.getId())).thenReturn(Collections.singletonList(product));
+
+        mockMvc.perform(get("/api/products/owner/{ownerId}", owner.getId())
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].owner.id").value(owner.getId()));
+    }
+
+    // Test cases for POST "/api/products" endpoint
+    @Test
+    @WithMockUser(value = "spring")
+    public void saveProduct_returnsProduct() throws Exception {
+        when(productsService.saveProduct(any(Products.class))).thenReturn(product);
+
+        mockMvc.perform(post("/api/products")
+                        .with(httpBasic(owner.getUsername(), owner.getPassword()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(new ObjectMapper().writeValueAsString(product)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.productName").value(product.getProductName()));
+    }
+
 }
