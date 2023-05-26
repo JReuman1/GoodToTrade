@@ -71,3 +71,20 @@ Los controladores de la aplicación definen las siguientes rutas:
     - GET /api/matches/match/{productId} : Obtiene los "matches" de un producto específico.
     - POST /api/matches : Crea un nuevo "match".
     - DELETE /api/matches/{id} : Elimina un "match" específico.
+
+## Testing:
+
+
+- `UsersController:`
+
+  ![Users _Controller_Test](GoodToTrade/src/main/resources/Users.png)
+
+
+- `UsersController:
+`
+  ![Products_Controller_Test](GoodToTrade/src/main/resources/Products.png)
+
+
+- `UsersController:`
+
+  ![TheLikes_Controller_Test](GoodToTrade/src/main/resources/TheLikes.png)
