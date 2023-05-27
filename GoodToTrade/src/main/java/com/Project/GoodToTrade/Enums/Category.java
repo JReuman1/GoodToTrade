@@ -8,5 +8,6 @@ public enum Category {
     TOOLS,
     TOYS,
     MEDICAL,
-    OUTDOORS
+    OUTDOORS,
+    POKEMONS
 }
