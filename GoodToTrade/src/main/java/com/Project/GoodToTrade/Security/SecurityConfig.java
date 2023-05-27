@@ -17,6 +17,11 @@ import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -45,6 +50,7 @@ public class SecurityConfig {
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBuilder.getOrBuild());
         customAuthenticationFilter.setFilterProcessesUrl("/api/login");
         http.csrf().disable()
+                .cors().and() // Aquí añadimos la configuración CORS
                 .sessionManagement().sessionCreationPolicy(STATELESS);
 
         http.authorizeHttpRequests((requests) -> requests
@@ -56,7 +62,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/likes/**").authenticated()
                 .requestMatchers("/api/matches").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/matches/**").authenticated()
-                );
+        );
 
         http.addFilter(customAuthenticationFilter);
         // Add the custom authorization filter before the standard authentication filter.
@@ -64,5 +70,17 @@ public class SecurityConfig {
 
         // Build the security filter chain to be returned.
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8082"));
+        configuration.setAllowedMethods(Arrays.asList("GET","POST", "PUT"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

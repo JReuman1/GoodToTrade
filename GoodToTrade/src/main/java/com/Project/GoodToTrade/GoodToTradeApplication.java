@@ -37,10 +37,10 @@ public class GoodToTradeApplication {
 			usersService.saveUser(new Users("Chris", "Corleone", "chris@anderson.com", "123456789", "1234", new ArrayList<>(), new ArrayList<>(), new ArrayList<>()));
 
 			usersService.addRoleToUser("Steinburg", "ROLE_ADMIN");
-			usersService.addRoleToUser("james", "ROLE_ADMIN");
-			usersService.addRoleToUser("jane", "ROLE_USER");
-			usersService.addRoleToUser("chris", "ROLE_ADMIN");
-			usersService.addRoleToUser("chris", "ROLE_USER");
+			usersService.addRoleToUser("James", "ROLE_ADMIN");
+			usersService.addRoleToUser("Jane", "ROLE_USER");
+			usersService.addRoleToUser("Chris", "ROLE_ADMIN");
+			usersService.addRoleToUser("Chris", "ROLE_USER");
 		};
 	}
 
