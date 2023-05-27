@@ -13,7 +13,7 @@
           :style="{ backgroundImage: `url(${product.imageUrl})` }"
         >
           <div class="product-info text-center">
-            <h2 class="text-white">{{ product.productName }}</h2>
+            <h2 class="text-black">{{ product.productName }}</h2>
           </div>
           <div class="actions d-flex justify-content-center mt-3">
               <button class="btn dislike" @click="dislike"></button>
@@ -122,7 +122,7 @@
    background-size: cover;
    background-position: center;
    background-repeat: no-repeat;
-   width: 30%;
+   width: 45%;
    height: 100%;
    position: relative;
    border-radius: 20px;
