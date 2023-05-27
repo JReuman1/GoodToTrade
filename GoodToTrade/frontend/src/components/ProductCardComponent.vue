@@ -6,15 +6,12 @@
         @like="like"
         @dislike="dislike"
       >
-        <tinder-card v-for="product in products" :key="product.id">
+        <tinder-card class="product-card" v-for="product in products" :key="product.id">
           <div
-            class="product-card"
             :style="{ backgroundImage: `url(${product.imageUrl})` }"
           >
             <div class="product-info">
               <h2>{{ product.productName }}</h2>
-              <p>{{ product.description }}</p>
-              <p>Precio: {{ product.price }}</p>
             </div>
             <div class="actions">
                 <button class="btn dislike" @click="dislike"></button>
