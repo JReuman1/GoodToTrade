@@ -1,27 +1,30 @@
 <template>
-    <div>
-      <tinder
-        v-if="products.length > 0"
-        ref="tinder"
-        @like="like"
-        @dislike="dislike"
-      >
-        <tinder-card class="product-card" v-for="product in products" :key="product.id">
-          <div
-            :style="{ backgroundImage: `url(${product.imageUrl})` }"
-          >
-            <div class="product-info">
-              <h2>{{ product.productName }}</h2>
-            </div>
-            <div class="actions">
-                <button class="btn dislike" @click="dislike"></button>
-                <button class="btn like" @click="like(product.id)"></button>
-            </div>
+  <div class="d-flex justify-content-center align-items-center" style="height: 100vh;">
+    <tinder
+      v-if="products.length > 0"
+      ref="tinder"
+      @like="like"
+      @dislike="dislike"
+      class="w-30 h-30"
+    >
+      <tinder-card class="product-card w-100 h-100" v-for="product in products" :key="product.id">
+        <div
+          class="bg-image w-100 h-100 d-flex flex-column justify-content-center align-items-center"
+          :style="{ backgroundImage: `url(${product.imageUrl})` }"
+        >
+          <div class="product-info text-center">
+            <h2 class="text-white">{{ product.productName }}</h2>
           </div>
-        </tinder-card>
-      </tinder>
-    </div>
-  </template>
+          <div class="actions d-flex justify-content-center mt-3">
+              <button class="btn dislike" @click="dislike"></button>
+              <button class="btn like" @click="like(product.id)"></button>
+          </div>
+        </div>
+      </tinder-card>
+    </tinder>
+  </div>
+</template>
+
   
   <script>
   import axios from "axios";
@@ -72,43 +75,65 @@
     },
   };
   </script>
-  
-  <style scoped>
-  .product-card {
-    /* estilos de la tarjeta del producto aquí */
-  }
-
-  .btn {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  border: none;
-}
-
-.dislike {
-  background-image: url('https://uploads.codesandbox.io/uploads/user/992079af-4d21-44ac-8853-43908c0d9b78/B5S4-nope.png');
-}
-
-.like {
-  background-image: url('https://uploads.codesandbox.io/uploads/user/992079af-4d21-44ac-8853-43908c0d9b78/B3NV-like.png');
-}
-
-.actions {
-  display: flex;
-  justify-content: center;
-  gap: 20px;
-}
-
-.product-card {
-  width: 100%;
-  height: 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 20% 20%;
-}
-
-  </style>
-  
+ <style scoped>
+ .product-card {
+   /* Tamaño y alineación */
+   width: 100%;
+   height: 100%;
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   align-items: center;
+ }
+ 
+ .btn {
+   /* Botones de like y dislike */
+   width: 100px;
+   height: 100px;
+   border-radius: 50%;
+   background-repeat: no-repeat;
+   background-position: center;
+   background-size: contain;
+   border: none;
+ }
+ 
+ .dislike {
+   /* Imagen del botón de dislike */
+   background-image: url('https://uploads.codesandbox.io/uploads/user/992079af-4d21-44ac-8853-43908c0d9b78/B5S4-nope.png');
+ }
+ 
+ .like {
+   /* Imagen del botón de like */
+   background-image: url('https://uploads.codesandbox.io/uploads/user/992079af-4d21-44ac-8853-43908c0d9b78/B3NV-like.png');
+ }
+ 
+ .actions {
+   /* Alineación de los botones */
+   position: absolute;
+   bottom: 10px;
+   display: flex;
+   justify-content: center;
+   gap: 20px;
+   width: 100%;
+ }
+ 
+ .bg-image {
+   /* Imagen de fondo */
+   background-size: cover;
+   background-position: center;
+   background-repeat: no-repeat;
+   width: 30%;
+   height: 100%;
+   position: relative;
+   border-radius: 20px;
+ }
+ 
+ .product-info h2 {
+   /* Estilos para el título del producto */
+   color: white;
+   font-weight: bold;
+   text-align: center;
+ }
+ 
+ </style>
+ 
