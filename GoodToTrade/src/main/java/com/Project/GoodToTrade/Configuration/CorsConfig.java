@@ -15,8 +15,8 @@ public class CorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         final CorsConfiguration configuration = new CorsConfiguration();
 
-        // Cambia el valor de "*" a "https://www.postman.com" si quieres permitir solo a postman
-        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
+        // Lista explícita de los orígenes permitidos
+        configuration.setAllowedOrigins(Arrays.asList("http://127.0.0.1:5173", "https://www.postman.com"));
         configuration.setAllowedMethods(Arrays.asList("HEAD", "GET", "POST", "PUT", "DELETE", "PATCH"));
         configuration.setAllowCredentials(true);
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
